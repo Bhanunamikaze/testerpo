@@ -1,0 +1,134 @@
+{
+  "description": "Passive Reconnaissance Configuration File",
+  "version": "1.0.0",
+
+  "scope": {
+    "generate_tld_variants": true,
+    "max_subdomains": 1000
+  },
+
+  "log_level": "INFO",
+  "log_file": "passive_recon.log",
+
+  "cache_dir": "cache",
+  "cache_ttl": 3600,
+
+  "rate_limits": {
+    "google": {
+      "requests_per_minute": 10,
+      "min_delay": 2.0
+    },
+    "bing": {
+      "requests_per_minute": 15,
+      "min_delay": 1.5
+    },
+    "github": {
+      "requests_per_hour": 60,
+      "min_delay": 1.0
+    },
+    "pastebin": {
+      "requests_per_minute": 30,
+      "min_delay": 2.0
+    },
+    "paste_fetch": {
+      "requests_per_minute": 60,
+      "min_delay": 1.0
+    }
+  },
+
+  "search_engines": {
+    "default_engine": "google",
+    "enabled_engines": ["google", "bing"],
+    "max_results_per_query": 50
+  },
+
+  "ct_logs": {
+    "enabled": true,
+    "sources": ["crt.sh", "certspotter"],
+    "certspotter_api_key": ""
+  },
+
+  "github": {
+    "enabled": true,
+    "api_token": "",
+    "max_repos_per_org": 50,
+    "search_code": true,
+    "search_commits": false
+  },
+
+  "cloud": {
+    "enabled": true,
+    "test_s3": true,
+    "test_gcs": true,
+    "test_azure": false,
+    "max_bucket_tests": 500,
+    "timeout": 5
+  },
+
+  "paste_sites": {
+    "enabled": true,
+    "pastebin_api_key": "",
+    "monitor_continuous": false
+  },
+
+  "secret_patterns": {
+    "enabled": true,
+    "entropy_checking": true,
+    "min_entropy": 3.5,
+    "verify_secrets": false
+  },
+
+  "vuln_indicators": {
+    "enabled": true,
+    "check_debug_mode": true,
+    "check_exposed_files": true,
+    "check_error_messages": true
+  },
+
+  "admin_patterns": {
+    "enabled": true,
+    "check_common_paths": true,
+    "check_devops_tools": true
+  },
+
+  "output": {
+    "directory": "results",
+    "formats": ["json", "csv", "html"],
+    "include_evidence": true,
+    "redact_secrets": true,
+    "max_snippet_length": 200
+  },
+
+  "filters": {
+    "min_confidence": 0.3,
+    "exclude_low_severity": false,
+    "deduplicate": true
+  },
+
+  "notes": [
+    "API Keys (Optional but Recommended):",
+    "- google_api_key: For Google Custom Search API",
+    "- google_cse_id: Custom Search Engine ID",
+    "- bing_api_key: For Bing Web Search API",
+    "- github.api_token: GitHub Personal Access Token (increases rate limits)",
+    "- certspotter_api_key: CertSpotter API key (optional, free tier available)",
+    "- pastebin_api_key: Pastebin scraping API key (requires PRO account)",
+    "",
+    "Rate Limits:",
+    "- Adjust rate_limits section based on your API quotas",
+    "- Free tiers typically have lower limits",
+    "- Add delays to avoid triggering anti-bot protections",
+    "",
+    "Output:",
+    "- Results saved to 'results/' directory by default",
+    "- JSON: Machine-readable, full details",
+    "- CSV: Spreadsheet import, flattened data",
+    "- HTML: Human-readable report with severity highlighting",
+    "",
+    "Security:",
+    "- Never commit this config with real API keys to version control",
+    "- Use environment variables for sensitive values",
+    "- Rotate API keys regularly",
+    "- Restrict file permissions: chmod 600 config.json"
+  ]
+}
