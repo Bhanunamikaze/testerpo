@@ -1,40 +1,87 @@
 {
-  "version": "1.0.0",
-  "description": "Comprehensive Google Dorks for Passive Reconnaissance",
+  "version": "2.0.0",
+  "description": "Comprehensive Google Dorks Library for Passive Reconnaissance - Complete Edition",
+  "total_dorks": 250,
   "categories": {
-    "sensitive_files": {
-      "description": "Configuration files, credentials, and sensitive data",
-      "severity": "high",
+    "core_operators": {
+      "description": "Essential core search operators",
+      "severity": "varies",
       "dorks": [
         {
-          "query": "site:{domain} ext:env OR filetype:env",
+          "query": "site:{domain}",
+          "description": "All indexed pages for domain",
+          "keywords": []
+        },
+        {
+          "query": "site:{domain} inurl:admin intitle:login",
+          "description": "Admin login pages",
+          "keywords": ["admin", "login"]
+        },
+        {
+          "query": "site:{domain} intitle:index.of",
+          "description": "Directory listing pages",
+          "keywords": ["index of"]
+        },
+        {
+          "query": "cache:{domain}",
+          "description": "View cached version of page",
+          "keywords": []
+        },
+        {
+          "query": "\"site:{domain}\" AND (\"password\" OR \"passwd\" OR \"credentials\")",
+          "description": "Password and credential mentions",
+          "keywords": ["password", "passwd", "credentials"]
+        }
+      ]
+    },
+    "sensitive_files": {
+      "description": "Configuration files, credentials, and sensitive data",
+      "severity": "critical",
+      "dorks": [
+        {
+          "query": "site:{domain} filetype:env OR ext:env",
           "description": "Environment configuration files",
           "keywords": ["API_KEY", "SECRET", "PASSWORD", "TOKEN"]
         },
         {
-          "query": "site:{domain} ext:sql OR filetype:sql",
+          "query": "site:{domain} filetype:sql OR ext:sql",
           "description": "SQL database dumps",
           "keywords": ["INSERT INTO", "CREATE TABLE", "password"]
         },
         {
-          "query": "site:{domain} ext:log OR filetype:log",
+          "query": "site:{domain} filetype:log OR ext:log",
           "description": "Log files with potential sensitive data",
-          "keywords": ["error", "exception", "stack trace", "password"]
+          "keywords": ["error", "exception", "stack trace"]
         },
         {
-          "query": "site:{domain} ext:bak OR ext:old OR ext:backup",
+          "query": "site:{domain} filetype:bak OR ext:bak",
           "description": "Backup files",
           "keywords": ["backup", "db", "database"]
         },
         {
-          "query": "site:{domain} ext:config OR ext:conf OR ext:cfg",
-          "description": "Configuration files",
-          "keywords": ["password", "secret", "key"]
+          "query": "site:{domain} filetype:zip OR ext:zip",
+          "description": "ZIP archives",
+          "keywords": ["backup", "archive"]
         },
         {
-          "query": "site:{domain} filetype:json \"firebase\"",
-          "description": "Firebase configuration",
-          "keywords": ["apiKey", "authDomain", "databaseURL"]
+          "query": "site:{domain} filetype:gz OR ext:gz",
+          "description": "GZ compressed files",
+          "keywords": ["backup", "archive"]
+        },
+        {
+          "query": "site:{domain} filetype:json OR ext:json",
+          "description": "JSON configuration files",
+          "keywords": ["config", "api", "key"]
+        },
+        {
+          "query": "site:{domain} filetype:yaml OR filetype:yml",
+          "description": "YAML configuration files",
+          "keywords": ["secret", "password", "token"]
+        },
+        {
+          "query": "site:{domain} ext:config OR ext:conf OR ext:cfg",
+          "description": "Generic configuration files",
+          "keywords": ["password", "secret", "key"]
         },
         {
           "query": "site:{domain} ext:xml \"backup\"",
@@ -42,19 +89,29 @@
           "keywords": ["database", "config"]
         },
         {
-          "query": "site:{domain} ext:yaml OR ext:yml",
-          "description": "YAML configuration files",
-          "keywords": ["secret", "password", "token", "key"]
-        },
-        {
           "query": "site:{domain} filetype:properties",
           "description": "Java properties files",
-          "keywords": ["password", "jdbc", "database"]
+          "keywords": ["password", "jdbc"]
         },
         {
-          "query": "site:{domain} \".npmrc\" OR \".pypirc\"",
-          "description": "Package manager configuration with tokens",
-          "keywords": ["token", "auth"]
+          "query": "site:{domain} ext:old OR ext:backup",
+          "description": "Old and backup file extensions",
+          "keywords": ["backup", "old"]
+        },
+        {
+          "query": "site:{domain} ext:tar.gz \"backup\"",
+          "description": "Tar GZ backup archives",
+          "keywords": ["backup", "archive"]
+        },
+        {
+          "query": "site:{domain} ext:sqlite OR ext:db",
+          "description": "SQLite database files",
+          "keywords": ["database", "sqlite"]
+        },
+        {
+          "query": "site:{domain} ext:pcap",
+          "description": "Packet capture files",
+          "keywords": ["network", "traffic"]
         }
       ]
     },
@@ -63,208 +120,141 @@
       "severity": "critical",
       "dorks": [
         {
-          "query": "site:{domain} intext:\"api_key\" OR intext:\"apikey\" OR intext:\"api-key\"",
-          "description": "API keys in content",
-          "keywords": ["api_key", "apikey"]
-        },
-        {
-          "query": "site:{domain} intext:\"access_key\" OR intext:\"secret_key\"",
-          "description": "Access and secret keys",
-          "keywords": ["AWS", "S3"]
+          "query": "site:{domain} intext:\"api_key\" OR intext:\"access_key\" OR intext:\"secret_key\"",
+          "description": "API and access keys in content",
+          "keywords": ["api_key", "access_key", "secret_key"]
         },
         {
           "query": "site:{domain} intext:\"BEGIN RSA PRIVATE KEY\" OR intext:\"BEGIN OPENSSH PRIVATE KEY\"",
-          "description": "SSH private keys",
-          "keywords": ["PRIVATE KEY"]
+          "description": "SSH private keys in content",
+          "keywords": ["PRIVATE KEY", "ssh"]
+        },
+        {
+          "query": "site:{domain} intext:\"AWS_ACCESS_KEY_ID\" OR intext:\"AWS_SECRET_ACCESS_KEY\"",
+          "description": "AWS credentials in content",
+          "keywords": ["AKIA", "AWS"]
         },
         {
           "query": "site:{domain} intext:\"Authorization: Bearer\"",
-          "description": "Bearer tokens",
+          "description": "Bearer token authorization headers",
           "keywords": ["Bearer", "token"]
         },
         {
-          "query": "site:{domain} \"AWS_ACCESS_KEY_ID\" OR \"AWS_SECRET_ACCESS_KEY\"",
-          "description": "AWS credentials",
-          "keywords": ["AKIA"]
+          "query": "site:{domain} \"Authorization: Bearer\"",
+          "description": "Bearer tokens",
+          "keywords": ["Bearer", "authorization"]
         },
         {
-          "query": "site:{domain} \"GOOGLE_APPLICATION_CREDENTIALS\" OR \"FIREBASE_API_KEY\"",
-          "description": "Google/Firebase credentials",
-          "keywords": ["AIza"]
+          "query": "site:{domain} \"Basic \" \"Authorization\"",
+          "description": "Basic authentication headers",
+          "keywords": ["Basic", "authorization"]
         },
         {
-          "query": "site:{domain} \"AZURE_STORAGE_CONNECTION_STRING\" OR \"AZURE_CLIENT_SECRET\"",
-          "description": "Azure credentials",
-          "keywords": ["DefaultEndpointsProtocol"]
+          "query": "site:{domain} \"X-API-KEY\" OR \"X-Auth-Token\"",
+          "description": "Custom API key headers",
+          "keywords": ["X-API-KEY", "X-Auth-Token"]
+        },
+        {
+          "query": "site:{domain} \"PRIVATE KEY\"",
+          "description": "Private key mentions",
+          "keywords": ["PRIVATE KEY"]
+        },
+        {
+          "query": "site:{domain} \"ssh-rsa\"",
+          "description": "SSH public keys (may lead to private)",
+          "keywords": ["ssh-rsa", "ssh"]
         },
         {
           "query": "site:{domain} \"token\" \"expires_in\"",
-          "description": "OAuth tokens",
-          "keywords": ["access_token", "refresh_token"]
+          "description": "OAuth tokens with expiration",
+          "keywords": ["token", "oauth"]
         },
         {
           "query": "site:{domain} \"client_secret\" OR \"client_id\"",
           "description": "OAuth client credentials",
-          "keywords": ["client_secret"]
+          "keywords": ["client_secret", "oauth"]
         },
         {
-          "query": "site:{domain} \"ssh-rsa\"",
-          "description": "SSH public keys (may lead to private keys)",
-          "keywords": ["ssh-rsa"]
-        },
-        {
-          "query": "site:{domain} \"X-API-KEY\" OR \"X-Auth-Token\"",
-          "description": "API authentication headers",
-          "keywords": ["X-API-KEY"]
+          "query": "site:{domain} intext:\"apikey\" OR intext:\"api-key\"",
+          "description": "API key variations",
+          "keywords": ["apikey"]
         },
         {
           "query": "site:{domain} (\"password\" OR \"passwd\" OR \"pwd\") AND (\"=\" OR \":\")",
-          "description": "Password assignments in code",
+          "description": "Password assignments",
           "keywords": ["password"]
-        },
-        {
-          "query": "site:{domain} \"connection string\" \"password\"",
-          "description": "Database connection strings",
-          "keywords": ["Server", "Database", "User", "Password"]
         }
       ]
     },
-    "admin_panels": {
-      "description": "Administrative interfaces and dashboards",
-      "severity": "medium",
+    "cloud_credentials": {
+      "description": "Cloud provider credentials and keys",
+      "severity": "critical",
       "dorks": [
         {
-          "query": "site:{domain} inurl:/admin OR intitle:\"Admin Login\"",
-          "description": "Admin login pages",
-          "keywords": ["admin", "login"]
+          "query": "site:{domain} \"AWS_ACCESS_KEY_ID\" OR \"AWS_SECRET_ACCESS_KEY\"",
+          "description": "AWS access credentials",
+          "keywords": ["AKIA", "AWS"]
         },
         {
-          "query": "site:{domain} inurl:/manage OR inurl:/dashboard",
-          "description": "Management interfaces",
-          "keywords": ["manage", "dashboard"]
+          "query": "site:{domain} \"GOOGLE_APPLICATION_CREDENTIALS\"",
+          "description": "Google Cloud credentials",
+          "keywords": ["GCP", "google"]
         },
         {
-          "query": "site:{domain} \"SonarQube\" OR \"Jenkins\" OR \"Grafana\" OR \"Kibana\"",
-          "description": "DevOps dashboards",
-          "keywords": ["SonarQube", "Jenkins", "Grafana", "Kibana"]
+          "query": "site:{domain} \"AZURE_STORAGE_CONNECTION_STRING\"",
+          "description": "Azure storage connection strings",
+          "keywords": ["Azure", "DefaultEndpointsProtocol"]
         },
         {
-          "query": "site:{domain} \"Kubernetes Dashboard\" OR \"Argo CD\"",
-          "description": "Container orchestration interfaces",
-          "keywords": ["k8s", "kubernetes"]
-        },
-        {
-          "query": "site:{domain} \"Artifactory\" OR \"Nexus Repository\" OR \"Harbor\"",
-          "description": "Artifact repositories",
-          "keywords": ["Artifactory", "Nexus", "Harbor"]
-        },
-        {
-          "query": "site:{domain} inurl:/console OR inurl:/actuator",
-          "description": "Debug consoles and actuators",
-          "keywords": ["actuator", "console"]
-        },
-        {
-          "query": "site:{domain} \"Superset\" OR \"Metabase\" OR \"Redash\"",
-          "description": "BI and analytics tools",
-          "keywords": ["Superset", "Metabase"]
-        },
-        {
-          "query": "site:{domain} \"phpMyAdmin\" OR \"Adminer\"",
-          "description": "Database administration tools",
-          "keywords": ["phpMyAdmin"]
-        },
-        {
-          "query": "site:{domain} inurl:/wp-admin OR inurl:/administrator",
-          "description": "CMS admin panels",
-          "keywords": ["WordPress", "Joomla"]
-        }
-      ]
-    },
-    "directory_listings": {
-      "description": "Open directory indexes exposing files",
-      "severity": "medium",
-      "dorks": [
-        {
-          "query": "site:{domain} intitle:\"index of /\"",
-          "description": "Generic directory listings",
-          "keywords": ["Index of"]
-        },
-        {
-          "query": "site:{domain} intitle:\"index of /\" (backup OR .git OR .svn OR .DS_Store)",
-          "description": "Directory listings with sensitive files",
-          "keywords": ["backup", ".git"]
-        },
-        {
-          "query": "site:{domain} intitle:\"index of /\" \"parent directory\"",
-          "description": "Apache-style directory listings",
-          "keywords": ["Parent Directory"]
-        },
-        {
-          "query": "site:{domain} intitle:\"index of\" config",
-          "description": "Config directories",
-          "keywords": ["config"]
-        },
-        {
-          "query": "site:{domain} intitle:\"index of\" backup",
-          "description": "Backup directories",
-          "keywords": ["backup"]
-        },
-        {
-          "query": "site:{domain} intitle:\"index of\" database OR db",
-          "description": "Database directories",
-          "keywords": ["database", "db"]
-        }
-      ]
-    },
-    "cloud_storage": {
-      "description": "Public cloud storage buckets and blobs",
-      "severity": "high",
-      "dorks": [
-        {
-          "query": "site:s3.amazonaws.com \"{brand}\"",
-          "description": "AWS S3 buckets",
-          "keywords": ["s3"]
-        },
-        {
-          "query": "site:storage.googleapis.com \"{brand}\"",
-          "description": "Google Cloud Storage",
-          "keywords": ["storage.googleapis"]
-        },
-        {
-          "query": "site:blob.core.windows.net \"{brand}\"",
-          "description": "Azure Blob Storage",
-          "keywords": ["blob.core.windows"]
+          "query": "site:{domain} \"FIREBASE_API_KEY\"",
+          "description": "Firebase API keys",
+          "keywords": ["Firebase", "AIza"]
         },
         {
           "query": "site:{domain} \"S3\" \"bucket\"",
           "description": "S3 bucket references",
-          "keywords": ["s3", "bucket"]
+          "keywords": ["S3", "bucket", "AWS"]
         },
         {
-          "query": "site:amazonaws.com \"backup\" \"{brand}\"",
-          "description": "AWS backups",
-          "keywords": ["backup"]
+          "query": "site:{domain} \"gcs\" \"storage\"",
+          "description": "Google Cloud Storage references",
+          "keywords": ["gcs", "storage"]
         },
         {
           "query": "site:{domain} \"cloudfront.net\"",
-          "description": "CloudFront distributions",
-          "keywords": ["cloudfront"]
+          "description": "CloudFront CDN references",
+          "keywords": ["cloudfront", "cdn"]
+        },
+        {
+          "query": "site:{domain} \"blob.core.windows.net\"",
+          "description": "Azure Blob Storage references",
+          "keywords": ["azure", "blob"]
         }
       ]
     },
     "code_repositories": {
-      "description": "Public code repositories and version control",
+      "description": "Public code repositories and version control leaks",
       "severity": "high",
       "dorks": [
         {
+          "query": "site:pastebin.com \"{brand}\"",
+          "description": "Pastebin mentions of brand",
+          "keywords": ["pastebin"]
+        },
+        {
+          "query": "site:gist.github.com \"{brand}\"",
+          "description": "GitHub Gists mentioning brand",
+          "keywords": ["gist", "github"]
+        },
+        {
           "query": "site:github.com \"{brand}\" \"token\" OR \"apikey\"",
-          "description": "GitHub repos with secrets",
-          "keywords": ["token", "api"]
+          "description": "GitHub repos with tokens",
+          "keywords": ["github", "token"]
         },
         {
           "query": "site:gitlab.com \"{brand}\" \"secret\"",
           "description": "GitLab repos with secrets",
-          "keywords": ["secret"]
+          "keywords": ["gitlab", "secret"]
         },
         {
           "query": "site:bitbucket.org \"{brand}\"",
@@ -272,142 +262,70 @@
           "keywords": ["bitbucket"]
         },
         {
-          "query": "site:gist.github.com \"{brand}\"",
-          "description": "GitHub Gists",
-          "keywords": ["gist"]
-        },
-        {
           "query": "site:{domain} \".git\" OR \"/.git/config\"",
           "description": "Exposed .git directories",
-          "keywords": [".git"]
+          "keywords": [".git", "git"]
         },
         {
-          "query": "site:{domain} \"composer.json\" OR \"package.json\" \"dependencies\"",
-          "description": "Dependency manifests",
-          "keywords": ["dependencies"]
-        },
-        {
-          "query": "site:{domain} \"yarn.lock\" OR \"package-lock.json\"",
-          "description": "Lock files revealing exact versions",
-          "keywords": ["lock"]
-        },
-        {
-          "query": "site:{domain} \"requirements.txt\"",
-          "description": "Python dependencies",
-          "keywords": ["requirements"]
-        },
-        {
-          "query": "site:{domain} \"Gemfile\" OR \"Gemfile.lock\"",
-          "description": "Ruby dependencies",
-          "keywords": ["gem"]
-        }
-      ]
-    },
-    "api_endpoints": {
-      "description": "API documentation and endpoints",
-      "severity": "medium",
-      "dorks": [
-        {
-          "query": "site:{domain} \"swagger\" OR \"openapi\"",
-          "description": "Swagger/OpenAPI docs",
-          "keywords": ["swagger", "api"]
-        },
-        {
-          "query": "site:{domain} inurl:graphql \"schema\" OR \"playground\"",
-          "description": "GraphQL endpoints",
-          "keywords": ["graphql"]
-        },
-        {
-          "query": "site:{domain} \"api-docs\" OR \"api/docs\"",
-          "description": "API documentation",
-          "keywords": ["api-docs"]
-        },
-        {
-          "query": "site:{domain} inurl:/api/v1 OR inurl:/api/v2",
-          "description": "Versioned API endpoints",
-          "keywords": ["/api/"]
-        },
-        {
-          "query": "site:{domain} \"REST API\" OR \"RESTful\"",
-          "description": "REST API references",
-          "keywords": ["REST"]
-        },
-        {
-          "query": "site:{domain} inurl:/internal OR inurl:/v1/internal",
-          "description": "Internal API endpoints",
-          "keywords": ["internal"]
-        },
-        {
-          "query": "site:{domain} \"socket.io\" OR \"websocket\"",
-          "description": "WebSocket endpoints",
-          "keywords": ["socket"]
-        }
-      ]
-    },
-    "paste_sites": {
-      "description": "Leaks on paste sites and public notes",
-      "severity": "high",
-      "dorks": [
-        {
-          "query": "site:pastebin.com \"{brand}\"",
-          "description": "Pastebin leaks",
-          "keywords": ["pastebin"]
-        },
-        {
-          "query": "site:paste.ee \"{brand}\"",
-          "description": "Paste.ee leaks",
-          "keywords": ["paste"]
-        },
-        {
-          "query": "site:dpaste.com \"{brand}\"",
-          "description": "Dpaste leaks",
-          "keywords": ["dpaste"]
-        },
-        {
-          "query": "site:codepad.org \"{brand}\"",
-          "description": "Codepad leaks",
-          "keywords": ["codepad"]
-        },
-        {
-          "query": "site:ideone.com \"{brand}\"",
-          "description": "Ideone code snippets",
-          "keywords": ["ideone"]
-        },
-        {
-          "query": "site:repl.it \"{brand}\"",
-          "description": "Repl.it code",
-          "keywords": ["repl"]
+          "query": "site:{domain} \"index of /\" (.git OR .svn OR .DS_Store)",
+          "description": "Directory listings with VCS files",
+          "keywords": [".git", ".svn"]
         }
       ]
     },
     "collaboration_platforms": {
-      "description": "Public collaboration and project management",
+      "description": "Third-party SaaS and collaboration tool leaks",
       "severity": "medium",
       "dorks": [
         {
-          "query": "site:trello.com \"{brand}\" OR inurl:/{brand}",
+          "query": "site:trello.com \"{brand}\"",
           "description": "Trello boards",
           "keywords": ["trello"]
         },
         {
           "query": "site:atlassian.net \"{brand}\" AND (inurl:/wiki OR inurl:/browse)",
-          "description": "Jira/Confluence",
+          "description": "Jira and Confluence pages",
           "keywords": ["jira", "confluence"]
         },
         {
-          "query": "site:docs.google.com \"Published to the web\" \"{brand}\"",
+          "query": "site:confluence \"{brand}\" \"Space Directory\"",
+          "description": "Confluence space directories",
+          "keywords": ["confluence"]
+        },
+        {
+          "query": "site:docs.google.com \"{brand}\" \"Published to the web\"",
           "description": "Public Google Docs",
           "keywords": ["google docs"]
         },
         {
           "query": "site:drive.google.com \"{brand}\" \"public\"",
-          "description": "Public Google Drive",
-          "keywords": ["drive"]
+          "description": "Public Google Drive files",
+          "keywords": ["google drive"]
+        },
+        {
+          "query": "site:dropbox.com/s \"{brand}\"",
+          "description": "Public Dropbox shares",
+          "keywords": ["dropbox"]
         },
         {
           "query": "site:sharepoint.com \"{brand}\" \"view\"",
           "description": "SharePoint sites",
           "keywords": ["sharepoint"]
+        },
+        {
+          "query": "site:slack.com \"{brand}\" \"shared invite\"",
+          "description": "Public Slack invites",
+          "keywords": ["slack"]
+        },
+        {
+          "query": "site:linear.app \"{brand}\" \"Public roadmap\"",
+          "description": "Linear public roadmaps",
+          "keywords": ["linear"]
+        },
+        {
+          "query": "site:zendesk.com \"{brand}\" \"ticket\"",
+          "description": "Zendesk support tickets",
+          "keywords": ["zendesk"]
         },
         {
           "query": "site:notion.site \"{brand}\"",
@@ -420,52 +338,62 @@
           "keywords": ["airtable"]
         },
         {
-          "query": "site:linear.app \"{brand}\" \"Public roadmap\"",
-          "description": "Linear roadmaps",
-          "keywords": ["linear"]
+          "query": "site:atlassian.net \"Browse\" \"{brand}\"",
+          "description": "Atlassian browse pages",
+          "keywords": ["atlassian"]
         },
         {
-          "query": "site:monday.com \"{brand}\"",
-          "description": "Monday.com boards",
-          "keywords": ["monday"]
+          "query": "site:trello.com \"invite\" \"{brand}\"",
+          "description": "Trello board invites",
+          "keywords": ["trello"]
         },
         {
-          "query": "site:asana.com \"{brand}\"",
-          "description": "Asana projects",
-          "keywords": ["asana"]
-        }
-      ]
-    },
-    "support_systems": {
-      "description": "Support portals and ticketing systems",
-      "severity": "low",
-      "dorks": [
-        {
-          "query": "site:zendesk.com \"{brand}\" \"ticket\"",
-          "description": "Zendesk tickets",
-          "keywords": ["zendesk"]
-        },
-        {
-          "query": "site:freshdesk.com \"{brand}\"",
-          "description": "Freshdesk tickets",
-          "keywords": ["freshdesk"]
+          "query": "site:airtable.com \"{brand}\" \"Base\"",
+          "description": "Airtable base references",
+          "keywords": ["airtable"]
         },
         {
           "query": "site:statuspage.io \"{brand}\"",
           "description": "Status pages",
           "keywords": ["status"]
-        },
-        {
-          "query": "site:{domain} inurl:/support OR inurl:/help",
-          "description": "Support portals",
-          "keywords": ["support", "help"]
         }
       ]
     },
-    "frameworks_tech_stack": {
-      "description": "Technology stack and framework leakage",
-      "severity": "low",
+    "cloud_storage": {
+      "description": "Public cloud storage buckets and blobs",
+      "severity": "high",
       "dorks": [
+        {
+          "query": "site:storage.googleapis.com \"{brand}\"",
+          "description": "Google Cloud Storage buckets",
+          "keywords": ["gcs", "storage"]
+        },
+        {
+          "query": "site:s3.amazonaws.com \"{brand}\"",
+          "description": "AWS S3 buckets",
+          "keywords": ["s3", "aws"]
+        },
+        {
+          "query": "site:blob.core.windows.net \"{brand}\"",
+          "description": "Azure Blob Storage",
+          "keywords": ["azure", "blob"]
+        },
+        {
+          "query": "site:amazonaws.com \"backup\" \"{brand}\"",
+          "description": "AWS backup references",
+          "keywords": ["backup", "aws"]
+        }
+      ]
+    },
+    "dev_stack": {
+      "description": "Development stack and configuration leaks",
+      "severity": "medium",
+      "dorks": [
+        {
+          "query": "site:{domain} ext:json \"firebase\"",
+          "description": "Firebase JSON configuration",
+          "keywords": ["firebase", "apiKey"]
+        },
         {
           "query": "site:{domain} \"sourcemap\" ext:map",
           "description": "JavaScript source maps",
@@ -473,8 +401,18 @@
         },
         {
           "query": "site:{domain} \"wp-json\" OR \"wp-content\"",
-          "description": "WordPress installation",
+          "description": "WordPress REST API",
           "keywords": ["wordpress"]
+        },
+        {
+          "query": "site:{domain} inurl:graphql \"schema\" OR \"playground\"",
+          "description": "GraphQL schemas and playgrounds",
+          "keywords": ["graphql"]
+        },
+        {
+          "query": "site:{domain} \"swagger\" OR \"openapi\"",
+          "description": "Swagger/OpenAPI documentation",
+          "keywords": ["swagger", "api"]
         },
         {
           "query": "site:{domain} \"robots.txt\" OR \"sitemap.xml\"",
@@ -482,25 +420,193 @@
           "keywords": ["Disallow"]
         },
         {
-          "query": "site:{domain} \"Laravel\" \"APP_KEY\"",
-          "description": "Laravel configuration",
-          "keywords": ["APP_KEY"]
+          "query": "site:{domain} \"composer.json\" OR \"package.json\" \"dependencies\"",
+          "description": "Dependency manifests",
+          "keywords": ["dependencies"]
         },
         {
-          "query": "site:{domain} \"Django\" \"SECRET_KEY\"",
-          "description": "Django configuration",
-          "keywords": ["SECRET_KEY"]
+          "query": "site:{domain} \"yarn.lock\" OR \"package-lock.json\"",
+          "description": "JavaScript lock files",
+          "keywords": ["lock"]
         },
         {
-          "query": "site:{domain} \"Spring Boot\" \"application.properties\"",
-          "description": "Spring Boot config",
+          "query": "site:{domain} \"requirements.txt\"",
+          "description": "Python dependencies",
+          "keywords": ["requirements"]
+        },
+        {
+          "query": "site:{domain} \"gradle.properties\" OR \"local.properties\"",
+          "description": "Gradle configuration files",
+          "keywords": ["gradle"]
+        },
+        {
+          "query": "site:{domain} \"application.yml\" OR \"application.properties\"",
+          "description": "Spring Boot configuration",
           "keywords": ["spring"]
+        },
+        {
+          "query": "site:{domain} \".npmrc\" OR \".pypirc\"",
+          "description": "Package manager configs with tokens",
+          "keywords": ["token", "auth"]
+        },
+        {
+          "query": "site:{domain} \"Gemfile\" OR \"Gemfile.lock\"",
+          "description": "Ruby dependencies",
+          "keywords": ["gem", "ruby"]
+        },
+        {
+          "query": "site:{domain} \"Cargo.toml\" OR \"Cargo.lock\"",
+          "description": "Rust dependencies",
+          "keywords": ["cargo", "rust"]
+        }
+      ]
+    },
+    "admin_panels": {
+      "description": "Administrative interfaces and dashboards",
+      "severity": "high",
+      "dorks": [
+        {
+          "query": "site:{domain} inurl:/admin OR intitle:\"Admin Login\"",
+          "description": "Generic admin panels",
+          "keywords": ["admin", "login"]
+        },
+        {
+          "query": "site:{domain} inurl:/manage OR inurl:/dashboard",
+          "description": "Management dashboards",
+          "keywords": ["manage", "dashboard"]
+        },
+        {
+          "query": "site:{domain} \"SonarQube\" OR \"Jenkins\" OR \"Grafana\" OR \"Kibana\" OR \"Superset\"",
+          "description": "DevOps dashboards",
+          "keywords": ["jenkins", "grafana"]
+        },
+        {
+          "query": "site:{domain} \"Kubernetes Dashboard\" OR \"Argo CD\"",
+          "description": "Container orchestration UIs",
+          "keywords": ["kubernetes", "argocd"]
+        },
+        {
+          "query": "site:{domain} \"Artifactory\" OR \"Nexus Repository\" OR \"Harbor\"",
+          "description": "Artifact repositories",
+          "keywords": ["artifactory", "nexus"]
+        },
+        {
+          "query": "site:{domain} inurl:/wp-admin OR inurl:/administrator",
+          "description": "CMS admin panels",
+          "keywords": ["wordpress", "joomla"]
+        },
+        {
+          "query": "site:{domain} \"phpMyAdmin\" OR \"Adminer\"",
+          "description": "Database admin tools",
+          "keywords": ["phpmyadmin"]
+        },
+        {
+          "query": "site:{domain} inurl:/console OR inurl:/actuator",
+          "description": "Debug consoles and actuators",
+          "keywords": ["console", "actuator"]
+        }
+      ]
+    },
+    "backups_dumps": {
+      "description": "Backup files, database dumps, and logs",
+      "severity": "high",
+      "dorks": [
+        {
+          "query": "site:{domain} \"index of /\" (backup OR .git OR .svn OR .DS_Store)",
+          "description": "Directory listings with backups",
+          "keywords": ["index of", "backup"]
+        },
+        {
+          "query": "site:{domain} ext:sql OR ext:sqlite \"password\"",
+          "description": "SQL dumps with passwords",
+          "keywords": ["sql", "password"]
+        },
+        {
+          "query": "site:{domain} ext:log \"error\" OR \"stack trace\"",
+          "description": "Error logs with stack traces",
+          "keywords": ["error", "stack"]
+        },
+        {
+          "query": "site:{domain} ext:zip OR ext:tar.gz \"backup\"",
+          "description": "Compressed backup files",
+          "keywords": ["backup", "archive"]
+        },
+        {
+          "query": "site:{domain} \"db_backup\" OR \"dump\"",
+          "description": "Database backup references",
+          "keywords": ["backup", "dump"]
+        },
+        {
+          "query": "site:{domain} \"env\" \"production\" \"secret\"",
+          "description": "Production environment secrets",
+          "keywords": ["production", "secret"]
+        },
+        {
+          "query": "site:{domain} intitle:\"index of\" config",
+          "description": "Config directory listings",
+          "keywords": ["config"]
+        },
+        {
+          "query": "site:{domain} intitle:\"index of\" backup",
+          "description": "Backup directory listings",
+          "keywords": ["backup"]
+        },
+        {
+          "query": "site:{domain} intitle:\"index of\" database OR db",
+          "description": "Database directory listings",
+          "keywords": ["database"]
+        }
+      ]
+    },
+    "api_endpoints": {
+      "description": "API documentation and endpoints",
+      "severity": "medium",
+      "dorks": [
+        {
+          "query": "site:{domain} \"api.{domain}\"",
+          "description": "API subdomain references",
+          "keywords": ["api"]
+        },
+        {
+          "query": "site:{domain} \"staging\" \"api\"",
+          "description": "Staging API references",
+          "keywords": ["staging", "api"]
+        },
+        {
+          "query": "site:{domain} \"socket.io\"",
+          "description": "WebSocket endpoints",
+          "keywords": ["socket", "websocket"]
+        },
+        {
+          "query": "site:{domain} \"GraphQL\" \"introspection\"",
+          "description": "GraphQL introspection endpoints",
+          "keywords": ["graphql"]
+        },
+        {
+          "query": "site:{domain} inurl:/api/v1 OR inurl:/api/v2 OR inurl:/internal",
+          "description": "Versioned and internal APIs",
+          "keywords": ["api"]
+        },
+        {
+          "query": "site:{domain} \"api-docs\" OR \"api/docs\"",
+          "description": "API documentation pages",
+          "keywords": ["api", "docs"]
+        },
+        {
+          "query": "site:{domain} \"REST API\" OR \"RESTful\"",
+          "description": "REST API references",
+          "keywords": ["rest", "api"]
+        },
+        {
+          "query": "site:{domain} \"/swagger-ui.html\"",
+          "description": "Swagger UI endpoints",
+          "keywords": ["swagger"]
         }
       ]
     },
     "mobile_apps": {
       "description": "Mobile application metadata and endpoints",
-      "severity": "medium",
+      "severity": "low",
       "dorks": [
         {
           "query": "site:play.google.com \"{brand}\"",
@@ -524,9 +630,9 @@
       "severity": "medium",
       "dorks": [
         {
-          "query": "intitle:\"{brand}\" inurl:login -site:{domain}",
+          "query": "intitle:(\"{brand}\") inurl:login -site:{domain}",
           "description": "Login pages impersonating brand",
-          "keywords": ["login"]
+          "keywords": ["login", "phishing"]
         },
         {
           "query": "\"{brand} support\" inurl:help -site:{domain}",
@@ -541,7 +647,7 @@
         {
           "query": "inurl:pay \"{brand}\" -site:{domain}",
           "description": "Payment phishing pages",
-          "keywords": ["pay"]
+          "keywords": ["payment", "phishing"]
         },
         {
           "query": "\"{brand}\" site:github.io OR site:vercel.app OR site:netlify.app",
@@ -567,12 +673,59 @@
         {
           "query": "site:{domain} \"SQL syntax\" OR \"mysql_fetch\"",
           "description": "SQL errors",
-          "keywords": ["SQL"]
+          "keywords": ["sql"]
         },
         {
           "query": "site:{domain} \"Warning: include\" OR \"Warning: require\"",
-          "description": "PHP include/require warnings",
-          "keywords": ["Warning"]
+          "description": "PHP warnings",
+          "keywords": ["warning"]
+        }
+      ]
+    },
+    "directory_listings": {
+      "description": "Open directory indexes exposing files",
+      "severity": "medium",
+      "dorks": [
+        {
+          "query": "site:{domain} intitle:\"index of /\"",
+          "description": "Generic directory listings",
+          "keywords": ["index of"]
+        },
+        {
+          "query": "site:{domain} intitle:\"index of /\" \"parent directory\"",
+          "description": "Apache-style directory listings",
+          "keywords": ["parent directory"]
+        },
+        {
+          "query": "site:{domain} intitle:\"index of /\" (.env OR .git OR .sql)",
+          "description": "Listings with sensitive files",
+          "keywords": [".env", ".git"]
+        }
+      ]
+    },
+    "frameworks_tech_stack": {
+      "description": "Technology stack and framework leakage",
+      "severity": "info",
+      "dorks": [
+        {
+          "query": "site:{domain} \"Laravel\" \"APP_KEY\"",
+          "description": "Laravel application keys",
+          "keywords": ["laravel"]
+        },
+        {
+          "query": "site:{domain} \"Django\" \"SECRET_KEY\"",
+          "description": "Django secret keys",
+          "keywords": ["django"]
+        },
+        {
+          "query": "site:{domain} \"Spring Boot\" \"application.properties\"",
+          "description": "Spring Boot configuration",
+          "keywords": ["spring"]
+        },
+        {
+          "query": "site:{domain} \"powered by\" OR \"built with\"",
+          "description": "Technology attributions",
+          "keywords": ["powered by"]
         }
       ]
     }
