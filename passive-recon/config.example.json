@@ -39,7 +39,15 @@
   "search_engines": {
     "default_engine": "google",
     "enabled_engines": ["google", "bing"],
-    "max_results_per_query": 50
+    "max_results_per_query": 50,
+    "use_browser": false,
+    "browser_count": 3,
+    "tabs_per_browser": 12,
+    "headless": true,
+    "delay_range": [2, 5],
+    "google_api_key": "",
+    "google_cse_id": "",
+    "bing_api_key": ""
   },
 
   "ct_logs": {

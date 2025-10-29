@@ -4,6 +4,10 @@
 # HTTP Requests
 requests>=2.31.0
 
+# Browser Automation (for browser-based search engine)
+# Enables concurrent dorking without API keys
+playwright>=1.40.0
+
 # Optional: Enhanced features
 # Uncomment if you want these capabilities
 

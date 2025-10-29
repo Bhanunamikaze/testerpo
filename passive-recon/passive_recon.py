@@ -41,6 +41,13 @@ from outputs.output_handler import OutputHandler
 from utils.cache_manager import CacheManager
 from utils.rate_limiter import RateLimiter
 
+# Try to import browser-based collector (optional)
+try:
+    from collectors.browser_search_engine import BrowserSearchEngineCollectorSync
+    BROWSER_COLLECTOR_AVAILABLE = True
+except ImportError:
+    BROWSER_COLLECTOR_AVAILABLE = False
+
 
 class PassiveReconScanner:
     """
@@ -102,12 +109,28 @@ class PassiveReconScanner:
 
     def _init_collectors(self) -> Dict:
         """Initialize all data collectors."""
-        return {
-            'search_engine': SearchEngineCollector(
+        # Choose search engine collector based on configuration
+        use_browser = self.config.get('search_engines', {}).get('use_browser', False)
+
+        if use_browser and BROWSER_COLLECTOR_AVAILABLE:
+            self.logger.info("Using browser-based search engine collector (Playwright)")
+            search_collector = BrowserSearchEngineCollectorSync(
                 self.config.get('search_engines', {}),
                 self.rate_limiter,
                 self.cache_manager
-            ),
+            )
+        else:
+            if use_browser and not BROWSER_COLLECTOR_AVAILABLE:
+                self.logger.warning("Browser collector requested but not available. Install: pip install playwright && playwright install chromium")
+            self.logger.info("Using API-based search engine collector")
+            search_collector = SearchEngineCollector(
+                self.config.get('search_engines', {}),
+                self.rate_limiter,
+                self.cache_manager
+            )
+
+        return {
+            'search_engine': search_collector,
             'certificate_transparency': CTCollector(
                 self.config.get('ct_logs', {}),
                 self.cache_manager

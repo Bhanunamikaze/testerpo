@@ -16,7 +16,12 @@ A comprehensive, field-tested passive reconnaissance toolkit for external penetr
 
 ### Data Sources
 - **Certificate Transparency Logs**: Subdomain discovery via crt.sh, CertSpotter
-- **Search Engines**: Google dorks, Bing queries (200+ predefined dorks)
+- **Search Engines**: 🚀 **NEW: Browser-based dorking** with Playwright
+  - **No API keys required** - Free unlimited dorking
+  - **High concurrency** - 3 browsers × 12 tabs = 36 concurrent queries
+  - **Stealth features** - Anti-detection techniques built-in
+  - **Alternative**: API-based (Google Custom Search, Bing API)
+  - **200+ predefined dorks** across 13 categories
 - **Code Repositories**: GitHub, GitLab, Bitbucket enumeration
 - **Cloud Storage**: AWS S3, Google Cloud Storage, Azure Blob discovery
 - **Paste Sites**: Pastebin, GitHub Gists, and more
@@ -60,15 +65,37 @@ cd passive-recon
 # Install dependencies
 pip install -r requirements.txt
 
+# Install Playwright browsers (for browser-based dorking)
+playwright install chromium
+
 # Copy example config
 cp config.example.json config.json
 
-# Edit config with your API keys (optional)
+# Edit config with your settings
 nano config.json
+
+# Enable browser-based dorking (no API keys needed!)
+# In config.json, set: "use_browser": true
 
 # Set secure permissions
 chmod 600 config.json
 ```
+
+### Browser-Based vs API-Based
+
+**Browser-Based** (Recommended - No API Keys):
+- ✅ Free unlimited queries
+- ✅ High speed (36+ concurrent queries)
+- ✅ Better results
+- ⚠️ May encounter CAPTCHAs with aggressive settings
+
+**API-Based** (Traditional):
+- ✅ No CAPTCHAs
+- ✅ Stable and reliable
+- ❌ Requires API keys ($5/1000 queries)
+- ❌ Lower query limits
+
+See **[BROWSER_SETUP.md](BROWSER_SETUP.md)** for detailed browser configuration.
 
 ## 🚀 Quick Start
 
