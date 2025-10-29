@@ -2,9 +2,10 @@
 
 from .cache_manager import CacheManager
 from .rate_limiter import RateLimiter
+from .validator import Validator, ValidationError
 
 try:
     from .browser_pool import BrowserPool, TabPool
-    __all__ = ['CacheManager', 'RateLimiter', 'BrowserPool', 'TabPool']
+    __all__ = ['CacheManager', 'RateLimiter', 'Validator', 'ValidationError', 'BrowserPool', 'TabPool']
 except ImportError:
-    __all__ = ['CacheManager', 'RateLimiter']
+    __all__ = ['CacheManager', 'RateLimiter', 'Validator', 'ValidationError']

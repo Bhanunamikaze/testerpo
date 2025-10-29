@@ -9,7 +9,7 @@ Calculates risk scores for findings based on:
 - Impact potential
 """
 
-from typing import Dict
+from typing import Dict, List
 
 
 class RiskScorer:

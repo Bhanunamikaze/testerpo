@@ -21,6 +21,7 @@ import argparse
 import json
 import logging
 import sys
+import signal
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -40,6 +41,7 @@ from scorers.risk_scorer import RiskScorer
 from outputs.output_handler import OutputHandler
 from utils.cache_manager import CacheManager
 from utils.rate_limiter import RateLimiter
+from utils.validator import Validator, ValidationError
 
 # Try to import browser-based collector (optional)
 try:
@@ -382,8 +384,20 @@ class PassiveReconScanner:
         self.logger.info("\n" + "="*60)
 
 
+def signal_handler(signum, frame):
+    """Handle interrupt signals gracefully."""
+    print("\n\n[!] Scan interrupted by user (Ctrl+C)")
+    print("[!] Cleaning up and exiting...")
+    print("[!] Partial results may be available in the output directory")
+    sys.exit(130)
+
+
 def main():
     """Main entry point for the script."""
+    # Set up signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
     parser = argparse.ArgumentParser(
         description='Passive Reconnaissance Tool for External Pentesting',
         epilog='Example: python passive_recon.py -c config.json -t example.com company-name',
@@ -414,13 +428,42 @@ def main():
         version='%(prog)s 1.0.0'
     )
 
+    parser.add_argument(
+        '--skip-validation',
+        action='store_true',
+        help='Skip input validation (not recommended)'
+    )
+
     args = parser.parse_args()
 
-    # Validate config file exists
-    if not Path(args.config).exists():
-        print(f"[!] Configuration file not found: {args.config}")
-        print("[!] Use: python passive_recon.py --help for usage information")
-        sys.exit(1)
+    # Validate inputs unless explicitly skipped
+    if not args.skip_validation:
+        print("[*] Validating inputs...")
+
+        config_path = Path(args.config)
+        scope_path = Path(args.scope_file) if args.scope_file else None
+
+        is_valid, results = Validator.validate_all(
+            args.targets,
+            config_path,
+            scope_path
+        )
+
+        # Print any warnings
+        if results['warnings']:
+            print("\n[!] Warnings:")
+            for warning in results['warnings']:
+                print(f"    - {warning}")
+
+        # Print errors and exit if validation failed
+        if not is_valid:
+            print("\n[!] Validation failed with the following errors:")
+            for error in results['errors']:
+                print(f"    - {error}")
+            print("\n[!] Use --skip-validation to bypass (not recommended)")
+            sys.exit(1)
+
+        print("[+] Validation passed\n")
 
     # Initialize and run scanner
     try:
@@ -428,6 +471,18 @@ def main():
         scanner.run(args.targets, args.scope_file)
     except KeyboardInterrupt:
         print("\n[!] Scan interrupted by user")
+        sys.exit(130)
+    except ValidationError as e:
+        print(f"\n[!] Validation error: {e}")
+        sys.exit(1)
+    except FileNotFoundError as e:
+        print(f"\n[!] File not found: {e}")
+        sys.exit(1)
+    except PermissionError as e:
+        print(f"\n[!] Permission denied: {e}")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"\n[!] Invalid JSON in configuration: {e}")
         sys.exit(1)
     except Exception as e:
         print(f"\n[!] Fatal error: {e}")
