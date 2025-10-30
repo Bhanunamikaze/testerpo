@@ -187,7 +187,8 @@ class BrowserSearchEngineCollector:
                 cache_key = f"browser_search:{query_info['query']}"
                 cached = self.cache_manager.get(cache_key)
 
-                if cached is not None:
+                # Only use cache if it has actual results (skip empty results)
+                if cached is not None and len(cached) > 0:
                     logger.debug(f"Cache hit: {query_info['query'][:50]}...")
                     all_findings.extend(cached)
                     continue
