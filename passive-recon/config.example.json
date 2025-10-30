@@ -99,6 +99,33 @@
     "check_devops_tools": true
   },
 
+  "active_recon": {
+    "subdomain_probing": {
+      "timeout": 5,
+      "follow_redirects": true,
+      "check_dns": true,
+      "check_http": true,
+      "check_https": true,
+      "threads": 10,
+      "user_agent": "Mozilla/5.0 (Security Scanner)"
+    },
+    "port_scanning": {
+      "scan_type": "common",
+      "timeout": 2,
+      "threads": 50,
+      "rate_limit": 100
+    },
+    "service_detection": {},
+    "tech_detection": {
+      "timeout": 10,
+      "user_agent": "Mozilla/5.0 (Security Scanner)"
+    },
+    "ssl_analysis": {
+      "timeout": 5,
+      "expiration_warning_days": 30
+    }
+  },
+
   "output": {
     "directory": "results",
     "formats": ["json", "csv", "html"],

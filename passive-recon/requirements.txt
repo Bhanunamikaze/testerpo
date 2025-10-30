@@ -8,6 +8,10 @@ requests>=2.31.0
 # Enables concurrent dorking without API keys
 playwright>=1.40.0
 
+# SSL/TLS Analysis (for active scanning)
+# Required for certificate analysis in active reconnaissance
+pyOpenSSL>=23.3.0
+
 # Optional: Enhanced features
 # Uncomment if you want these capabilities
 

@@ -50,6 +50,17 @@ try:
 except ImportError:
     BROWSER_COLLECTOR_AVAILABLE = False
 
+# Try to import active reconnaissance modules (optional - requires explicit --active-scan flag)
+try:
+    from active_modules.subdomain_prober import SubdomainProber
+    from active_modules.port_scanner import PortScanner
+    from active_modules.service_detector import ServiceDetector
+    from active_modules.tech_detector import TechnologyDetector
+    from active_modules.ssl_analyzer import SSLAnalyzer
+    ACTIVE_MODULES_AVAILABLE = True
+except ImportError:
+    ACTIVE_MODULES_AVAILABLE = False
+
 
 class PassiveReconScanner:
     """
@@ -161,13 +172,34 @@ class PassiveReconScanner:
             'admin_panels': AdminPanelDetector(self.config.get('admin_patterns', {}))
         }
 
-    def run(self, targets: List[str], scope_file: Optional[str] = None):
+    def _init_active_modules(self) -> Dict:
+        """
+        Initialize active reconnaissance modules.
+
+        ⚠️  These modules perform ACTIVE scanning and require explicit authorization!
+        """
+        if not ACTIVE_MODULES_AVAILABLE:
+            self.logger.warning("Active modules not available - install dependencies")
+            return {}
+
+        active_config = self.config.get('active_recon', {})
+
+        return {
+            'subdomain_prober': SubdomainProber(active_config.get('subdomain_probing', {})),
+            'port_scanner': PortScanner(active_config.get('port_scanning', {})),
+            'service_detector': ServiceDetector(active_config.get('service_detection', {})),
+            'tech_detector': TechnologyDetector(active_config.get('tech_detection', {})),
+            'ssl_analyzer': SSLAnalyzer(active_config.get('ssl_analysis', {}))
+        }
+
+    def run(self, targets: List[str], scope_file: Optional[str] = None, active_scan: bool = False):
         """
         Execute the complete passive reconnaissance workflow.
 
         Args:
             targets: List of root domains or organization names
             scope_file: Optional file containing additional scope definitions
+            active_scan: Enable active reconnaissance (requires authorization!)
         """
         self.logger.info("="*60)
         self.logger.info("Starting Passive Reconnaissance Scan")
@@ -184,6 +216,16 @@ class PassiveReconScanner:
         # Phase 2: Asset Discovery
         self.logger.info("\n[Phase 2] Discovering assets...")
         self._discover_assets(scope)
+
+        # Phase 2.5: Active Reconnaissance (OPTIONAL - requires explicit flag)
+        if active_scan:
+            self.logger.info("\n[Phase 2.5] ⚠️  ACTIVE RECONNAISSANCE ENABLED ⚠️")
+            self.logger.warning("="*60)
+            self.logger.warning("PERFORMING ACTIVE SCANNING - ENSURE YOU HAVE AUTHORIZATION!")
+            self.logger.warning("="*60)
+            self._active_reconnaissance()
+        else:
+            self.logger.info("\n[Phase 2.5] Active reconnaissance: DISABLED (use --active-scan to enable)")
 
         # Phase 3: Content and Indicator Extraction
         self.logger.info("\n[Phase 3] Extracting indicators from discovered assets...")
@@ -238,6 +280,141 @@ class PassiveReconScanner:
         paste_results = self.collectors['paste_sites'].collect(scope)
         self.findings.extend(paste_results)
         self.logger.info(f"    Found {len(paste_results)} paste site references")
+
+    def _active_reconnaissance(self):
+        """
+        Phase 2.5: Active Reconnaissance - REQUIRES AUTHORIZATION!
+
+        Performs active scanning on discovered assets:
+        - Subdomain liveness probing (DNS + HTTP/HTTPS)
+        - Port scanning (TCP)
+        - Service detection and banner grabbing
+        - Web technology detection (CMS, WAF, frameworks)
+        - SSL/TLS certificate analysis
+        """
+        # Initialize active modules
+        active_modules = self._init_active_modules()
+
+        if not active_modules:
+            self.logger.error("Active modules not available - cannot perform active scanning")
+            return
+
+        # Extract discovered subdomains from CT logs
+        subdomains_to_probe = set()
+
+        # Get subdomains from assets
+        for asset in self.assets:
+            # Assets from CT logs are typically subdomains
+            if not asset.startswith('http'):
+                subdomains_to_probe.add(asset)
+
+        if not subdomains_to_probe:
+            self.logger.warning("No subdomains discovered to perform active reconnaissance")
+            return
+
+        self.logger.info(f"  Performing active reconnaissance on {len(subdomains_to_probe)} discovered subdomains...")
+
+        # Step 1: Probe subdomains for liveness
+        self.logger.info("\n  [2.5.1] Probing subdomains for liveness (DNS + HTTP/HTTPS)...")
+        live_subdomains = active_modules['subdomain_prober'].probe_subdomains(subdomains_to_probe)
+        self.logger.info(f"    ✓ Found {len(live_subdomains)} live subdomains")
+
+        if not live_subdomains:
+            self.logger.info("    No live subdomains found - skipping further active recon")
+            return
+
+        # Add liveness results to findings
+        for subdomain_result in live_subdomains:
+            self.findings.append({
+                'category': 'active_recon',
+                'type': 'live_subdomain',
+                'subdomain': subdomain_result['subdomain'],
+                'data': subdomain_result,
+                'source': 'active_recon',
+                'severity': 'info'
+            })
+
+        # Step 2: Port scanning on live hosts
+        self.logger.info("\n  [2.5.2] Scanning ports on live hosts...")
+        port_scan_results = active_modules['port_scanner'].scan_hosts(live_subdomains)
+        self.logger.info(f"    ✓ Found {len(port_scan_results)} hosts with open ports")
+
+        # Add port scan results to findings
+        for port_result in port_scan_results:
+            self.findings.append({
+                'category': 'active_recon',
+                'type': 'open_ports',
+                'subdomain': port_result['subdomain'],
+                'data': port_result,
+                'source': 'active_recon',
+                'severity': 'medium' if port_result['total_open'] > 0 else 'info'
+            })
+
+        # Step 3: Service detection on open ports
+        if port_scan_results:
+            self.logger.info("\n  [2.5.3] Detecting services on open ports...")
+            service_results = active_modules['service_detector'].detect_services(port_scan_results)
+
+            for service_result in service_results:
+                self.findings.append({
+                    'category': 'active_recon',
+                    'type': 'service_detection',
+                    'subdomain': service_result['subdomain'],
+                    'data': service_result,
+                    'source': 'active_recon',
+                    'severity': 'info'
+                })
+
+        # Step 4: Web technology detection
+        self.logger.info("\n  [2.5.4] Detecting web technologies...")
+        tech_results = active_modules['tech_detector'].detect_technologies(live_subdomains)
+        self.logger.info(f"    ✓ Detected technologies on {len(tech_results)} hosts")
+
+        for tech_result in tech_results:
+            # Check for concerning technologies
+            severity = 'info'
+            technologies = tech_result.get('technologies', {})
+
+            # Increase severity if admin panels or development frameworks detected
+            if any('admin' in str(t).lower() for t in technologies.get('cms', [])):
+                severity = 'medium'
+
+            self.findings.append({
+                'category': 'active_recon',
+                'type': 'technology_detection',
+                'subdomain': tech_result['subdomain'],
+                'data': tech_result,
+                'source': 'active_recon',
+                'severity': severity
+            })
+
+        # Step 5: SSL/TLS analysis
+        self.logger.info("\n  [2.5.5] Analyzing SSL/TLS certificates...")
+        ssl_results = active_modules['ssl_analyzer'].analyze_certificates(live_subdomains)
+        self.logger.info(f"    ✓ Analyzed {len(ssl_results)} SSL certificates")
+
+        for ssl_result in ssl_results:
+            cert = ssl_result.get('certificate', {})
+            validity = cert.get('validity', {})
+
+            # Determine severity based on certificate status
+            severity = 'info'
+            if validity.get('is_expired'):
+                severity = 'high'
+            elif validity.get('expiration_warning'):
+                severity = 'medium'
+
+            self.findings.append({
+                'category': 'active_recon',
+                'type': 'ssl_certificate',
+                'subdomain': ssl_result['subdomain'],
+                'data': ssl_result,
+                'source': 'active_recon',
+                'severity': severity
+            })
+
+        self.logger.info("\n  Active reconnaissance complete!")
+        self.logger.info(f"  Total active findings: {len([f for f in self.findings if f.get('source') == 'active_recon'])}")
 
     def _extract_indicators(self):
         """
@@ -434,7 +611,45 @@ def main():
         help='Skip input validation (not recommended)'
     )
 
+    parser.add_argument(
+        '--active-scan',
+        action='store_true',
+        help='⚠️  Enable active reconnaissance (DNS/HTTP probing, port scanning, etc.) - REQUIRES AUTHORIZATION!'
+    )
+
     args = parser.parse_args()
+
+    # Show warning if active scanning is enabled
+    if args.active_scan:
+        print("\n" + "="*70)
+        print("⚠️  WARNING: ACTIVE RECONNAISSANCE ENABLED ⚠️")
+        print("="*70)
+        print("Active scanning will directly interact with target infrastructure:")
+        print("  - DNS lookups")
+        print("  - HTTP/HTTPS requests")
+        print("  - TCP port scanning")
+        print("  - Service enumeration")
+        print("  - Banner grabbing")
+        print()
+        print("LEGAL REQUIREMENT:")
+        print("  You MUST have explicit written authorization from the asset owner")
+        print("  before proceeding with active scanning.")
+        print()
+        print("Unauthorized scanning is illegal in most jurisdictions and may result")
+        print("in criminal charges.")
+        print("="*70)
+
+        # Require confirmation
+        try:
+            confirmation = input("\nType 'I HAVE AUTHORIZATION' to continue: ")
+            if confirmation != "I HAVE AUTHORIZATION":
+                print("\n[!] Authorization not confirmed. Exiting...")
+                sys.exit(1)
+        except (KeyboardInterrupt, EOFError):
+            print("\n\n[!] Scan cancelled")
+            sys.exit(1)
+
+        print("\n[+] Authorization confirmed. Proceeding with active scanning...\n")
 
     # Validate inputs unless explicitly skipped
     if not args.skip_validation:
@@ -468,7 +683,7 @@ def main():
     # Initialize and run scanner
     try:
         scanner = PassiveReconScanner(args.config)
-        scanner.run(args.targets, args.scope_file)
+        scanner.run(args.targets, args.scope_file, active_scan=args.active_scan)
     except KeyboardInterrupt:
         print("\n[!] Scan interrupted by user")
         sys.exit(130)
