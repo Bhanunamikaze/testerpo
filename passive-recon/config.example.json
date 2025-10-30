@@ -3,6 +3,7 @@
   "version": "1.0.0",
 
   "scope": {
+    "minimal_scope": false,
     "generate_tld_variants": true,
     "max_subdomains": 1000
   },

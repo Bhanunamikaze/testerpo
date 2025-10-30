@@ -47,6 +47,7 @@ class ScopeBuilder:
         """Initialize scope builder with configuration."""
         self.config = config
         self.scope_config = config.get('scope', {})
+        self.minimal_scope = self.scope_config.get('minimal_scope', False)
 
     def build_scope(self, targets: List[str], scope_file: str = None) -> Dict:
         """
@@ -116,6 +117,10 @@ class ScopeBuilder:
         - Common service subdomains
         """
         variants = {domain}
+
+        # If minimal_scope is enabled, return only the original domain
+        if self.minimal_scope:
+            return variants
 
         # Extract base domain (without TLD)
         parts = domain.split('.')
