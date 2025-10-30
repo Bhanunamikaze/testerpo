@@ -201,11 +201,16 @@ class PassiveReconScanner:
             scope_file: Optional file containing additional scope definitions
             active_scan: Enable active reconnaissance (requires authorization!)
         """
+        # Store scan metadata for output generation
+        self.scan_start_time = datetime.utcnow()
+        self.scan_targets = targets
+        self.scan_type = 'passive+active' if active_scan else 'passive'
+
         self.logger.info("="*60)
         self.logger.info("Starting Passive Reconnaissance Scan")
         self.logger.info("="*60)
         self.logger.info(f"Targets: {', '.join(targets)}")
-        self.logger.info(f"Timestamp: {datetime.utcnow().isoformat()}Z")
+        self.logger.info(f"Timestamp: {self.scan_start_time.isoformat()}Z")
 
         # Phase 1: Scope Seeding
         self.logger.info("\n[Phase 1] Building reconnaissance scope...")
@@ -503,23 +508,35 @@ class PassiveReconScanner:
         """
         output_dir = self.config.get('output', {}).get('directory', 'results')
 
-        # JSON output
-        self.output_handler.write_json(self.findings, output_dir)
-        self.logger.info(f"  JSON report: {output_dir}/findings.json")
+        # Build scan metadata for enhanced reporting
+        scan_metadata = {
+            'scan_start': self.scan_start_time.isoformat() + 'Z' if hasattr(self, 'scan_start_time') else datetime.utcnow().isoformat() + 'Z',
+            'scan_end': datetime.utcnow().isoformat() + 'Z',
+            'targets': self.scan_targets if hasattr(self, 'scan_targets') else [],
+            'scan_type': self.scan_type if hasattr(self, 'scan_type') else 'passive',
+            'tool_version': '2.0.0',
+            'total_findings': len(self.findings)
+        }
 
-        # CSV output
-        self.output_handler.write_csv(self.findings, output_dir)
-        self.logger.info(f"  CSV report: {output_dir}/findings.csv")
+        # Generate all configured output formats (JSON, CSV, HTML, TXT)
+        self.output_handler.write_all_formats(self.findings, output_dir, scan_metadata)
 
-        # HTML report
-        self.output_handler.write_html(self.findings, output_dir, self.config)
-        self.logger.info(f"  HTML report: {output_dir}/report.html")
+        # Log generated files
+        formats = self.config.get('output', {}).get('formats', ['json', 'csv', 'html', 'txt'])
+        if 'json' in formats:
+            self.logger.info(f"  JSON report: {output_dir}/findings.json")
+        if 'csv' in formats:
+            self.logger.info(f"  CSV report: {output_dir}/findings.csv")
+        if 'html' in formats:
+            self.logger.info(f"  HTML report: {output_dir}/report.html")
+        if 'txt' in formats:
+            self.logger.info(f"  TXT report: {output_dir}/findings.txt")
 
-        # High-severity findings
+        # High-severity findings (separate JSON file)
         critical_findings = [f for f in self.findings if f.get('severity') in ['high', 'critical']]
         if critical_findings:
-            self.output_handler.write_json(critical_findings, output_dir, filename='critical_findings.json')
-            self.logger.info(f"  Critical findings: {output_dir}/critical_findings.json")
+            self.output_handler.write_json(critical_findings, output_dir, scan_metadata, filename='critical_findings.json')
+            self.logger.info(f"  Critical findings: {output_dir}/critical_findings.json ({len(critical_findings)} findings)")
 
     def _print_summary(self):
         """Print executive summary of findings."""

@@ -128,7 +128,7 @@
 
   "output": {
     "directory": "results",
-    "formats": ["json", "csv", "html"],
+    "formats": ["json", "csv", "html", "txt"],
     "include_evidence": true,
     "redact_secrets": true,
     "max_snippet_length": 200
@@ -156,9 +156,10 @@
     "",
     "Output:",
     "- Results saved to 'results/' directory by default",
-    "- JSON: Machine-readable, full details",
+    "- JSON: Machine-readable, full details with statistics",
     "- CSV: Spreadsheet import, flattened data",
-    "- HTML: Human-readable report with severity highlighting",
+    "- HTML: Interactive report with charts and color-coded findings",
+    "- TXT: Human-readable text format with executive summary",
     "",
     "Security:",
     "- Never commit this config with real API keys to version control",

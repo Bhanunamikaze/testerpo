@@ -220,7 +220,7 @@ class Validator:
             if not formats:
                 warnings.append("No output formats specified")
 
-            valid_formats = ['json', 'csv', 'html']
+            valid_formats = ['json', 'csv', 'html', 'txt']
             invalid = [f for f in formats if f not in valid_formats]
             if invalid:
                 warnings.append(f"Invalid output formats: {', '.join(invalid)}")
