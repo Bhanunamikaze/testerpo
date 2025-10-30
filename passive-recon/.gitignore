@@ -45,6 +45,7 @@ cache/
 
 # Results and sensitive data
 results/
+test_results/
 *.json
 !config.example.json
 !rules/*.json
