@@ -16,7 +16,7 @@
                     },
                     "firstName": "hacked",
                     "lastName": "victim",
-                    "email": "prajwal.prakash+test@newfold.com",
+                    "email": "newuser@domain.com",
                     "companyName": "",
                     "phone": "05444479816",
                     "address": {
