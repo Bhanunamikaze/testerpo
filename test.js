@@ -16,7 +16,7 @@
                     },
                     "firstName": "hacked",
                     "lastName": "victim",
-                    "email": "newuser@domain.com",
+                    "email": "prajwalp1198@gmail.com",
                     "companyName": "",
                     "phone": "05444479816",
                     "address": {
